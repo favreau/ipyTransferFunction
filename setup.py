@@ -22,6 +22,7 @@
 
 """setup.py"""
 import os
+import re
 
 from setuptools import setup
 from pip.req import parse_requirements
@@ -30,10 +31,19 @@ from optparse import Option
 
 BASEDIR = os.path.dirname(os.path.abspath(__file__))
 
+version_file = 'version.py'
+version_line = open(version_file, "rt").read()
+version_regexp = r"^__version__ = ['\"]([^'\"]*)['\"]"
+mo = re.search(version_regexp, version_line, re.M)
+if mo:
+    version_str = mo.group(1)
+else:
+    raise RuntimeError('Unable to find version string in %s.' % (version_file,))
+
 
 def parse_reqs(reqs_file):
     ''' parse the requirements '''
-    options = Option("--workaround")
+    options = Option('--workaround')
     options.skip_requirements_regex = None
     options.isolated_mode = True
     install_reqs = parse_requirements(reqs_file, options=options, session=PipSession())
@@ -41,7 +51,6 @@ def parse_reqs(reqs_file):
 
 
 REQS = parse_reqs(os.path.join(BASEDIR, "requirements.txt"))
-
 EXTRA_REQS_PREFIX = 'requirements_'
 EXTRA_REQS = {}
 for file_name in os.listdir(BASEDIR):
@@ -53,9 +62,9 @@ for file_name in os.listdir(BASEDIR):
     EXTRA_REQS[extra] = parse_reqs(file_name)
 
 exec(open('version.py').read())
-setup(name="ipyTransferFunction",
-      version=VERSION,
-      description="Transfer function editor for Jupyter notebook",
+setup(name='ipyTransferFunction',
+      version=version_str,
+      description='Transfer function editor for Jupyter notebook',
       packages=['ipyTransferFunction'],
       url='https://github.com/favreau/ipyTransferFunction.git',
       author='Cyrille Favreau',
