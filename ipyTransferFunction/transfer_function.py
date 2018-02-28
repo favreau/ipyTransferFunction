@@ -113,7 +113,7 @@ class TransferFunctionEditor(object):
             overflow_x='hidden', height='180px', max_width='20px')
         color_picker_item_layout = Layout(
             overflow_x='hidden', height='20px', max_width='20px')
-        box_layout = Layout(display='inline-flex', flex_flow='row wrap')
+        box_layout = Layout(display='inline-flex')
 
         # Sliders
         self.alpha_sliders = [widgets.IntSlider(
