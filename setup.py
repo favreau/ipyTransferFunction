@@ -22,53 +22,35 @@
 
 """setup.py"""
 import os
-import re
-
-from setuptools import setup
-from pip.req import parse_requirements
-from pip.download import PipSession
-from optparse import Option
+import pathlib
+import pkg_resources
+from setuptools import find_packages, setup
 
 BASEDIR = os.path.dirname(os.path.abspath(__file__))
 
-version_file = 'version.py'
-version_line = open(version_file, "rt").read()
-version_regexp = r"^__version__ = ['\"]([^'\"]*)['\"]"
-mo = re.search(version_regexp, version_line, re.M)
-if mo:
-    version_str = mo.group(1)
-else:
-    raise RuntimeError('Unable to find version string in %s.' % (version_file,))
-
-
 def parse_reqs(reqs_file):
     ''' parse the requirements '''
-    options = Option('--workaround')
-    options.skip_requirements_regex = None
-    options.isolated_mode = True
-    install_reqs = parse_requirements(reqs_file, options=options, session=PipSession())
-    return [str(ir.req) for ir in install_reqs]
+    install_reqs = list()
+    with pathlib.Path(reqs_file).open() as requirements_txt:
+        install_reqs = [str(requirement)
+                        for requirement
+                        in pkg_resources.parse_requirements(requirements_txt)]
+    return install_reqs
 
 
 REQS = parse_reqs(os.path.join(BASEDIR, "requirements.txt"))
-EXTRA_REQS_PREFIX = 'requirements_'
-EXTRA_REQS = {}
-for file_name in os.listdir(BASEDIR):
-    if not file_name.startswith(EXTRA_REQS_PREFIX):
-        continue
-    base_name = os.path.basename(file_name)
-    (extra, _) = os.path.splitext(base_name)
-    extra = extra[len(EXTRA_REQS_PREFIX):]
-    EXTRA_REQS[extra] = parse_reqs(file_name)
 
-exec(open('version.py').read())
-setup(name='ipyTransferFunction',
-      version=version_str,
-      description='Transfer function editor for Jupyter notebook',
-      packages=['ipyTransferFunction'],
-      url='https://github.com/favreau/ipyTransferFunction.git',
-      author='Cyrille Favreau',
-      author_email='cyrille.favreau@gmail.com',
-      license='GNU LGPL',
-      install_requires=REQS,
-      extras_require=EXTRA_REQS,)
+# read the contents of README.md
+this_directory = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(this_directory, 'README.md')) as f:
+    long_description = f.read()
+
+setup(
+    packages=find_packages(),
+    install_requires=REQS,
+    name='ipyTransferFunction',
+    description='Transfer function editor for Blue Brain BioExplorer',
+    url='https://github.com/favreau/ipyTransferFunction.git',
+    author='Cyrille Favreau',
+    author_email='cyrille.favreau@epfl.ch',
+    license='GNU LGPL')
